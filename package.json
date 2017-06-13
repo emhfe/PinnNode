@@ -1,0 +1,18 @@
+{
+  "name": "pinnacle-api-g8",
+  "version": "1.0.0",
+  "description": "Feeder from pinnacle to G8",
+  "main": "test.js",
+  "dependencies": {
+    "config": "^1.25.1",
+    "moment-timezone": "^0.5.13",
+    "pinnacle-sports-api": "^1.0.5",
+    "seriate": "^0.9.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

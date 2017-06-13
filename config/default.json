@@ -1,0 +1,6 @@
+{
+	"endpoint": "https://api.pinnacle.com",
+	"username": "testalfa",
+	"password": "test123",
+	"sport" : [3,4,19,29,33]
+}
