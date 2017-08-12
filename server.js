@@ -10,10 +10,7 @@ var io = require('socket.io').listen(server);
 app.use(express.static(path.join(__dirname, 'public')));
 
 io.on('connection', function (socket) {
-  console.log('here')
-
   if (socket.handshake.headers['user-agent'] !== 'node-XMLHttpRequest') {
-    console.log('and here')
     socket.join('subscribers');
   }
 

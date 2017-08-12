@@ -1,0 +1,8 @@
+{
+  "db": {
+    "server": "mssql1007.ixwebhosting.com",
+    "user": "BBBmr0a_pinnuser",
+    "password": "bxJfCWY3U4Xq",
+    "database": "BBBmr0a_pinn"
+  }
+}

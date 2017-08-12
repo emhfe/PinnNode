@@ -5,20 +5,17 @@ var moment  = require('moment-timezone');
 var pinnacleAPI = require('pinnacle-sports-api');
 var pinnacle    = new pinnacleAPI(config.get("username"), config.get("password"));
 
-// Change the config settings to match your 
+var logger = require('./library/notify');
+
+// Change the config settings to match your
 // SQL Server and database
-var configDB = {  
-    "server": "10.10.10.46",
-    "user": "sportbookdba",
-    "password": "lumalu",
-    "database": "Pinnacle"
-};
+var configDB = config.get('db');
 
 sql.setDefaultConfig( configDB );
 
 var sports = config.get("sport");
 
-console.log("started");
+logger("started");
 
 //getLeagueBySport(4,0);
 //checkGame(715629062,0);
@@ -27,7 +24,7 @@ collectGames(sports,false);
 
 /*
 sendLine(linetosend,function(lineResult){
-	console.log(lineResult);
+	logger(lineResult);
 });
 */
 
@@ -39,9 +36,9 @@ function collectGames(sportList,overwrite){
 			sid = res.sportID;
 			leagues = res.league;
 			var gameOptions = { sportId : sid, leagueids : leagues.toString() };
-			//console.log(gameOptions)
+			//logger(gameOptions)
 			getGames(gameOptions, overwrite, function(gamesReturn){
-				console.log(gamesReturn);
+				logger(gamesReturn);
 			});
 			
 		});
@@ -56,10 +53,10 @@ function collectLines(sportList){
 		getLeagueBySport(sportID, function(res){
 			sid = res.sportID;
 			leagues = res.league;				
-			//console.log(sid+" "+leagues);
+			//logger(sid+" "+leagues);
 			checkLastSince(sid,leagues, function(oddsOptions){
 				getLines(oddsOptions, function(oddsReturn){
-					console.log(oddsReturn);
+					logger(oddsReturn);
 				});
 			});
 		});
@@ -84,9 +81,9 @@ function checkGame(gameID,cb){
 			isGame = true;
 		}
 		cb(isGame);
-        //console.log( results.length );
+        //logger( results.length );
     }, function( err ) {
-        console.log( "Something bad happened:", err );
+        logger( "Something bad happened:", err );
     } );
 	
 }
@@ -112,7 +109,7 @@ function getLeagueBySport(sportID,cb){
 		r.league.push(leagueList);
         cb(r);
     }, function( err ) {
-        console.log( "Something bad happened:", err );
+        logger( "Something bad happened:", err );
     } );
 	
 }
@@ -137,7 +134,7 @@ function getGames(options,overwrite,cb){
 				el = el + eventLength;
 				if (eventLength > 0){
 					
-					console.log(sportId+" "+leagueId+" "+league.events.length);
+					logger(sportId+" "+leagueId+" "+league.events.length);
 					
 					var events = league.events;
 					
@@ -161,15 +158,15 @@ function getGames(options,overwrite,cb){
 						var dt = moment(eventUTC);
 						var eventDT = dt.tz('America/New_York');
 						var newDT = new Date(eventDT);
-						//console.log(eventDT+" "+newDT);
-						//console.log(eventId+" "+eventDT+" "+home+" "+away);
+						//logger(eventDT+" "+newDT);
+						//logger(eventId+" "+eventDT+" "+home+" "+away);
 						
 						checkGame(eventId, function(id) {
 							if (!id){
 								addGame(sportId,leagueId,eventId,newDT,away,home,rot,live,status,parlay,awayPitcher,homePitcher);
 							} 
 							//else {
-							//	console.log("Game Already in the System");
+							//	logger("Game Already in the System");
 							//}
 						});
 						
@@ -198,9 +195,9 @@ function addSince(sportID,leagueID,since){
 			since	: { type: sql.BIGINT, val: since }
         }
     } ).then( function( results ) {
-        console.log( "Since Added" );
+        logger( "Since Added" );
     }, function( err ) {
-        console.log( "Something bad happened:", err );
+        logger( "Something bad happened:", err );
     } );
 	
 }
@@ -226,9 +223,9 @@ function addGame(sportID,leagueID,eventID,gameDT,away,home,rot,live,st,parlay,aw
 			homePitcher : { type: sql.VARCHAR, val: homePitcher }
         }
     } ).then( function( results ) {
-        console.log( "Game Added" );
+        logger( "Game Added" );
     }, function( err ) {
-        console.log( "Something bad happened:", err );
+        logger( "Something bad happened:", err );
     } );
 	
 }
@@ -262,7 +259,7 @@ function addLine(sportID,leagueID,eventID,lineID,periodID,periodCutoff,live,alt,
 			totalUn	: { type: sql.INT, val: totalUn },
         }
     } ).then( function( results ) {
-        //console.log( "Line Added" );
+        //logger( "Line Added" );
 		if (alt == 0){
 			var linetosend = {
 				"u" : "g8",
@@ -284,11 +281,11 @@ function addLine(sportID,leagueID,eventID,lineID,periodID,periodCutoff,live,alt,
 				"draw" : draw
 			}
 			sendLine(linetosend,function(lineResult){
-				console.log(lineResult);
+				logger(lineResult);
 			});
 		}
     }, function( err ) {
-        console.log( "Something bad happened:", err );
+        logger( "Something bad happened:", err );
     } );
 	
 }
@@ -318,7 +315,7 @@ function checkLastSince(sportID,leagueID,cb){
 		}
 		
     }, function( err ) {
-        console.log( "Something bad happened:", err );
+        logger( "Something bad happened:", err );
     } );
 	
 }
@@ -394,7 +391,7 @@ function getLines(options,cb) {
 										homeOdds = spreads[spread].home;
 										awayOdds = spreads[spread].away;
 									}
-									//console.log(alternativeID+" "+homeSpread);
+									//logger(alternativeID+" "+homeSpread);
 								}
 							}
 							//MONEYLINE
@@ -404,7 +401,7 @@ function getLines(options,cb) {
 								if (period.moneyline.hasOwnProperty('draw')){
 									draw = period.moneyline.draw;
 								}
-								//console.log(homeML+" "+awayML);
+								//logger(homeML+" "+awayML);
 							}
 							//TOTAL
 							if(period.hasOwnProperty('totals')){
@@ -426,7 +423,7 @@ function getLines(options,cb) {
 										totalOver   = totals[total].over;
 										totalUnder  = totals[total].under;
 									}
-									//console.log(alternativeID+" "+totalPoints+" "+totalOver+" / "+totalUnder);
+									//logger(alternativeID+" "+totalPoints+" "+totalOver+" / "+totalUnder);
 								}
 							}
 
@@ -442,7 +439,7 @@ function getLines(options,cb) {
 			r['status'] = 1;
 			r['sportId'] = sportId;
 			r['events'] = el;
-			//console.log("Sport: "+sportId+"League: "+leagueId+" Lines Added: "+eventLength);
+			//logger("Sport: "+sportId+"League: "+leagueId+" Lines Added: "+eventLength);
 		} else {
 			r['status'] = 1;
 			r['events'] = eventLength;
@@ -457,7 +454,7 @@ function sendLine(params, cb){
 		'http://tools.golden8sports.com/bridge/index.asp',
 		{ form: params },
 		function (error, response, body) {
-			//console.log(body);
+			//logger(body);
 			if (!error && response.statusCode == 200) {
 				cb(body);
 			}
